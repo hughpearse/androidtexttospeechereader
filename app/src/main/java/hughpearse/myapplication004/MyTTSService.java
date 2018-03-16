@@ -18,7 +18,7 @@ import java.util.Locale;
 
 public class MyTTSService extends Service {
 
-    private static final String TAG = "Class-MyTTSService";
+    private static final String TAG = "TTS-MyTTSService";
     private TextToSpeech tts;
     private boolean isInit = false;
     private final IBinder myBinder = new MyBinder();
@@ -26,11 +26,11 @@ public class MyTTSService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "Creating TTS Service");
+        Log.i(TAG, "Creating TTS Service");
         Context context = this.getApplicationContext();
         this.tts = new TextToSpeech(context, onInitListener);
         this.tts.setOnUtteranceProgressListener(utteranceProgressListener);
-        Log.d(TAG, "TTS Service Created");
+        Log.i(TAG, "TTS Service Created");
     }
 
     private TextToSpeech.OnInitListener onInitListener =  new TextToSpeech.OnInitListener() {
@@ -40,15 +40,15 @@ public class MyTTSService extends Service {
                 int result = tts.setLanguage(Locale.US);
                 if (result == TextToSpeech.LANG_MISSING_DATA
                         || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "This Language is not supported");
+                    Log.e(TAG, "This Language is not supported");
                 } else {
                     //init success
                     isInit = true;
-                    Log.d(TAG, "TTS Initialized.");
+                    Log.i(TAG, "TTS Initialized.");
                 }
             } else {
                 isInit = false;
-                Log.e("TTS", "Initilization Failed!");
+                Log.i(TAG, "TTS Initilization Failed!");
             }
         }
     };
@@ -77,7 +77,7 @@ public class MyTTSService extends Service {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                Log.d(TAG, e.toString());
+                Log.i(TAG, e.toString());
             }
         }
     }
@@ -108,13 +108,13 @@ public class MyTTSService extends Service {
 
         @Override
         public void onError(String utteranceId) {
-            Log.e(TAG, "Error while trying to synthesize sample text");
+            Log.i(TAG, "Error while trying to synthesize sample text");
         }
     };
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(TAG, "Binding TTS Service");
+        Log.i(TAG, "Binding TTS Service");
         return myBinder;
     }
 

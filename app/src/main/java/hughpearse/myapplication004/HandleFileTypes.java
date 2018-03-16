@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 public class HandleFileTypes extends AppCompatActivity {
 
-    private static final String TAG = "Class-HandleFileTypes";
+    private static final String TAG = "TTS-HandleFileTypes";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +25,7 @@ public class HandleFileTypes extends AppCompatActivity {
         setContentView(R.layout.activity_handle_extract);
         Bundle bundle = this.getIntent().getExtras();
         Uri uri = bundle.getParcelable("fileUri");
-        Log.d(TAG, "Handling file: " + uri.toString());
+        Log.i(TAG, "Handling file: " + uri.toString());
 
         String path = uri.getPath();
         int dot = path.lastIndexOf(".");
@@ -52,19 +52,23 @@ public class HandleFileTypes extends AppCompatActivity {
 
         // DocumentProvider
         if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+            Log.i(TAG, "Getting path for DocumentProvider");
             // ExternalStorageProvider
             if (isExternalStorageDocument(uri)) {
+                Log.i(TAG, "Getting path for ExternalStorageDocument");
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");
                 final String type = split[0];
 
                 if ("primary".equalsIgnoreCase(type)) {
+                    Log.i(TAG, "Getting path for primary volume");
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
                 }
                 // TODO handle non-primary volumes
             }
             // DownloadsProvider
             else if (isDownloadsDocument(uri)) {
+                Log.i(TAG, "Getting path for DownloadsProvider");
                 final String id = DocumentsContract.getDocumentId(uri);
                 final Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
                 return getDataColumn(context, contentUri, null, null);
@@ -72,6 +76,7 @@ public class HandleFileTypes extends AppCompatActivity {
             // MediaProvider
             else
             if (isMediaDocument(uri)) {
+                Log.i(TAG, "Getting path for MediaProvider");
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");
                 final String type = split[0];
@@ -90,6 +95,7 @@ public class HandleFileTypes extends AppCompatActivity {
         }
         // MediaStore (and general)
         else if ("content".equalsIgnoreCase(uri.getScheme())) {
+            Log.i(TAG, "Getting path for MediaStore");
             // Return the remote address
             if (isGooglePhotosUri(uri))
                 return uri.getLastPathSegment();
@@ -97,6 +103,7 @@ public class HandleFileTypes extends AppCompatActivity {
         }
         // File
         else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            Log.i(TAG, "Getting path for File");
             return uri.getPath();
         }
         return null;

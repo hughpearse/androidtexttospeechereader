@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int HANDLE_FILE_TYPES_CODE = 3;
     private static final int DISPLAY_READER_CODE = 4;
     private static final int DONATE_ACTIVITY_CODE = 5;
-    private static final String TAG = "Class-MainActivity";
+    private static final String TAG = "TTS-MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,17 +51,17 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(android.Manifest.permission. READ_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
-                Log.v(TAG,"Permission is granted");
+                Log.i(TAG,"Permission is granted");
                 return true;
             } else {
-                Log.v(TAG,"Permission is revoked");
+                Log.i(TAG,"Permission is revoked");
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission. READ_EXTERNAL_STORAGE}, 1);
                 return false;
             }
         }
         else {
             //permission is automatically granted on sdk<23 upon installation
-            Log.v(TAG,"Permission is granted");
+            Log.i(TAG,"Permission is granted");
             return true;
         }
     }
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
-            Log.v(TAG,"Permission: "+permissions[0]+ "was "+grantResults[0]);
+            Log.i(TAG,"Permission: "+permissions[0]+ "was "+grantResults[0]);
             //resume tasks needing this permission
         }
     }
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                     myIntent.putExtra("fileUri", uri);
                     startActivityForResult(myIntent, HANDLE_FILE_TYPES_CODE);
                 } else {
-                    Log.d(TAG, "Result not OK, could not select file");
+                    Log.i(TAG, "Result not OK, could not select file");
                 }
                 break;
             case HANDLE_FILE_TYPES_CODE:
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                     myIntent.putExtra("sentences", extractedText);
                     startActivity(myIntent);
                 } else {
-                    Log.d(TAG, "Result not OK, could not read file");
+                    Log.i(TAG, "Result not OK, could not read file");
                 }
                 break;
             case DISPLAY_READER_CODE:

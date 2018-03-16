@@ -14,7 +14,7 @@ import java.util.Arrays;
 
 public class ExtractFromTxt {
 
-    private static final String TAG = "Class-ExtractFromTxt";
+    private static final String TAG = "TTS-ExtractFromTxt";
 
     /**
      *
@@ -23,7 +23,7 @@ public class ExtractFromTxt {
      * @throws Exception
      */
     public ArrayList<String> extract(String fileName){
-        Log.d(TAG, "Parsing txt file");
+        Log.i(TAG, "Parsing txt file");
         String data = "";
         ArrayList<String> sentences = new ArrayList<String>();
         try {
@@ -38,7 +38,7 @@ public class ExtractFromTxt {
                 br.close();
             }
         } catch(Exception e){
-            Log.d(TAG,e.toString());
+            Log.i(TAG,e.toString());
         }
         //use positive look behind regular expression to split file in to sentences
         sentences = new ArrayList<>(Arrays.asList(data.split("(?<=[\\.])|(?=[\n])|(?<=[\n])")));

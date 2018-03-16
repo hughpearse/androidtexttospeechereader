@@ -26,7 +26,7 @@ import javax.annotation.Nonnull;
 
 public class DonateActivity extends AppCompatActivity {
 
-    private static final String TAG = "Class-DonateActivity";
+    private static final String TAG = "TTS-DonateActivity";
     public static final int REQUEST_CODE = 1001;
     private final ActivityCheckout mCheckout = Checkout.forActivity(this, CheckoutApplication.get().getBilling());
     private Inventory mInventory;

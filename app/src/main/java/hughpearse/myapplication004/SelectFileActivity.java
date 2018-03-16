@@ -9,14 +9,14 @@ import android.util.Log;
 public class SelectFileActivity extends AppCompatActivity {
 
     private static final int FILE_SELECT_CODE = 2;
-    private static final String TAG = "Class-SelectFileActivity";
+    private static final String TAG = "TTS-SelectFileActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_file);
 
-        Log.d(TAG, "Loading file");
+        Log.i(TAG, "Loading file");
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
@@ -32,7 +32,7 @@ public class SelectFileActivity extends AppCompatActivity {
                     uri = data.getData();
                     data.putExtra("fileUri", uri);
                 } else {
-                    Log.d(TAG, "Result not OK");
+                    Log.i(TAG, "Result not OK");
                 }
                 break;
         }
