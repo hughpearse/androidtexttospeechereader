@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class ReaderActivity extends AppCompatActivity {
 
-    private static final String TAG = "TTS-ReaderActivity";
+    private static final String TAG = "Class-ReaderActivity";
     EditText textBox;
     Button playPause;
     ArrayList<String> sentences = new ArrayList<>();
@@ -53,7 +53,7 @@ public class ReaderActivity extends AppCompatActivity {
             textBox.append(sentence);
         }
         textBox.setKeyListener(null);
-        Log.i(TAG, "Binding TTS Service");
+        Log.d(TAG, "Binding TTS Service");
     }
 
     @Override
@@ -69,23 +69,29 @@ public class ReaderActivity extends AppCompatActivity {
     }
 
     public void readSentences(){
-        for(String sentence : sentences){
+        for(final String sentence : sentences){
             //Log.d(TAG +"Sencence", sentence);
             while(!tts.isInit()){
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
-                    Log.i(TAG, e.toString());
+                    Log.d(TAG, e.toString());
                 }
             }
             tts.speak(sentence, this);
-            updateUI(sentence);
+
+            this.runOnUiThread(new Runnable() {
+                public void run() {
+                    updateUI(sentence);
+                }
+            });
+
             tts.waitToFinishSpeaking();
             while(!playing){
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
-                    Log.i(TAG, e.toString());
+                    Log.d(TAG, e.toString());
                 }
             }
         }
