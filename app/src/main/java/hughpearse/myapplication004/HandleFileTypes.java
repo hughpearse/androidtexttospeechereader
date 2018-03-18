@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class HandleFileTypes extends AppCompatActivity {
@@ -28,13 +29,16 @@ public class HandleFileTypes extends AppCompatActivity {
         Log.i(TAG, "Handling file: " + uri.toString());
 
         String path = uri.getPath();
-        int dot = path.lastIndexOf(".");
-        String extension = path.substring(dot + 1);
         String fileName = getPath(getApplicationContext(), uri);
+        Log.i(TAG, "fileName: " + fileName);
+        int dot = fileName.lastIndexOf(".");
+        String extension = fileName.substring(dot + 1);
+        Log.i(TAG, "Extension: " + extension);
 
         ArrayList<String> extractedText = new ArrayList<String>();
 
         if(extension.toLowerCase().contains("txt")){
+            Log.i(TAG, "Launching txt extractor");
             ExtractFromTxt extractor = new ExtractFromTxt();
             extractedText = extractor.extract(fileName);
         } else if (extension.toLowerCase().contains("pdf")) {
@@ -47,6 +51,16 @@ public class HandleFileTypes extends AppCompatActivity {
         this.finish();
     }
 
+    /**
+     * Handle different storage locations in Android
+     *
+     * References
+     * https://stackoverflow.com/questions/36128077/android-opening-a-file-with-action-get-content-results-into-different-uris
+     *
+     * @param context
+     * @param uri
+     * @return
+     */
     public static String getPath(Context context, Uri uri) {
         final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 
@@ -57,12 +71,15 @@ public class HandleFileTypes extends AppCompatActivity {
             if (isExternalStorageDocument(uri)) {
                 Log.i(TAG, "Getting path for ExternalStorageDocument");
                 final String docId = DocumentsContract.getDocumentId(uri);
+                Log.i(TAG, "docId: " + docId);
                 final String[] split = docId.split(":");
                 final String type = split[0];
 
                 if ("primary".equalsIgnoreCase(type)) {
                     Log.i(TAG, "Getting path for primary volume");
-                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+                    String path = Environment.getExternalStorageDirectory() + "/" + split[1];
+                    Log.i(TAG, path);
+                    return path;
                 }
                 // TODO handle non-primary volumes
             }
@@ -71,11 +88,13 @@ public class HandleFileTypes extends AppCompatActivity {
                 Log.i(TAG, "Getting path for DownloadsProvider");
                 final String id = DocumentsContract.getDocumentId(uri);
                 final Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-                return getDataColumn(context, contentUri, null, null);
+                Log.i(TAG, "contentUri: " + contentUri);
+                String dataColumn = getDataColumn(context, contentUri, null, null);
+                Log.i(TAG, "dataColumn: " + dataColumn);
+                return dataColumn;
             }
             // MediaProvider
-            else
-            if (isMediaDocument(uri)) {
+            else if (isMediaDocument(uri)) {
                 Log.i(TAG, "Getting path for MediaProvider");
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");

@@ -27,4 +27,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/openFileButton" />
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contextClickable="false"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        android:singleLine="false"
+        android:text="Open a file to listen\n Supports: .txt"
+        android:textAlignment="center"
+        android:background="@android:color/transparent"
+        android:lines="5"
+        app:layout_constraintBottom_toTopOf="@+id/openFileButton"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="94dp" />
 </android.support.constraint.ConstraintLayout>
