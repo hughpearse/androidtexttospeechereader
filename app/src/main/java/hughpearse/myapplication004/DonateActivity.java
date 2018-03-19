@@ -1,12 +1,16 @@
 package hughpearse.myapplication004;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import org.solovyev.android.checkout.ActivityCheckout;
+import org.solovyev.android.checkout.Billing;
 import org.solovyev.android.checkout.BillingRequests;
+import org.solovyev.android.checkout.Cache;
 import org.solovyev.android.checkout.Checkout;
 import org.solovyev.android.checkout.EmptyRequestListener;
 import org.solovyev.android.checkout.Inventory;
@@ -15,79 +19,102 @@ import org.solovyev.android.checkout.Inventory.Product;
 import org.solovyev.android.checkout.Purchase;
 import org.solovyev.android.checkout.RequestListener;
 import org.solovyev.android.checkout.Sku;
-import org.solovyev.android.checkout.Skus;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.annotation.Nonnull;
+
+import static org.solovyev.android.checkout.ResponseCodes.ITEM_ALREADY_OWNED;
 
 
 public class DonateActivity extends AppCompatActivity {
 
     private static final String TAG = "TTS-DonateActivity";
-    public static final int REQUEST_CODE = 1001;
     private final ActivityCheckout mCheckout = Checkout.forActivity(this, CheckoutApplication.get().getBilling());
-    private Inventory mInventory;
+    private Inventory storeInventory;
+    private Inventory custInventory;
 
-    //listener for purchases
-    private class PurchaseListener extends EmptyRequestListener<Purchase> {
+    //listener for store inventory
+    private class StoreInventoryCallback implements Inventory.Callback {
         @Override
-        public void onSuccess(Purchase purchase) {
-            //all purchased items are consumed by default
-            consume(purchase);
-        }
-
-        @Override
-        public void onError(int response, Exception e) {
-            // handle errors here
-        }
-    }
-
-    //listener for consumed items
-    private <T> RequestListener<T> makeRequestListener() {
-        return new RequestListener<T>() {
-            @Override
-            public void onSuccess(@Nonnull T result) {
-                /*
-                mInventory.load(
-                        Inventory.Request.create()
-                        .loadAllPurchases()
-                        .loadSkus(ProductTypes.IN_APP, getInAppSkus()), new InventoryCallback());
-                */
-            }
-
-            @Override
-            public void onError(int response, @Nonnull Exception e) {
-            }
-        };
-    }
-
-
-
-    private class InventoryCallback implements Inventory.Callback {
-        @Override
-        public void onLoaded(Inventory.Products products) {
+        public void onLoaded(@NonNull Inventory.Products products) {
+            Log.i(TAG, "Fetching store prices");
             Button donateButton1 = (Button) findViewById(R.id.donateButton1);
             Button donateButton5 = (Button) findViewById(R.id.donateButton5);
             Button donateButton10 = (Button) findViewById(R.id.donateButton10);
             Button donateButton15 = (Button) findViewById(R.id.donateButton15);
 
-            for(Product p : products){
-                for(Sku sku : p.getSkus()){
-                    if(sku.id.code == "donate_1_euro"){
-                        donateButton1.setText("Donate €" + sku.detailedPrice.toString());
-                    } else if(sku.id.code == "donate_5_euro"){
-                        donateButton5.setText("Donate €" + sku.detailedPrice.toString());
-                    } else if(sku.id.code == "donate_10_euro"){
-                        donateButton10.setText("Donate €" + sku.detailedPrice.toString());
-                    } else if(sku.id.code == "donate_15_euro"){
-                        donateButton15.setText("Donate €" + sku.detailedPrice.toString());
+            for (Product p : products) {
+                for (Sku sku : p.getSkus()) {
+                    if (sku.id.code.contains("donate_1_euro")) {
+                        donateButton1.setText("Donate " + sku.price);
+                    } else if (sku.id.code.contains("donate_5_euro")) {
+                        donateButton5.setText("Donate " + sku.price);
+                    } else if (sku.id.code.contains("donate_10_euro")) {
+                        donateButton10.setText("Donate " + sku.price);
+                    } else if (sku.id.code.contains("donate_15_euro")) {
+                        donateButton15.setText("Donate " + sku.price);
                     }
                 }
-
             }
+        }
+    }
+
+    //listener for customer's inventory
+    private class CustomerInventoryCallback implements Inventory.Callback {
+        @Override
+        public void onLoaded(@NonNull Inventory.Products products) {
+            Log.i(TAG, "Reloading customers inventory");
+            //Products [inapp, subs]
+            //Skus [donate_10_euro, donate_5_euro]
+            for(Product product : products){
+                Log.i(TAG, product.getSkus().size() + " skus");
+                for(Sku sku : product.getSkus()){
+                    if(sku.id.code.contains("donate_")){
+                        List<Purchase> purchases = product.getPurchases();
+                        Log.i(TAG, "Sku " + sku.id.code + " has " + purchases.size() + " purchases");
+                        for(Purchase purchase : purchases){
+                            Log.i(TAG, "Consuming purchase: " + purchase.data);
+                            consume(purchase);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    //listener for purchases
+    private class PurchaseListener extends EmptyRequestListener<Purchase> {
+        @Override
+        public void onSuccess(@NonNull Purchase purchase) {
+            //all purchased items are consumed by default
+            Log.i(TAG, "Purchase of " + purchase.sku + " completed");
+            consume(purchase);
+        }
+
+        @Override
+        public void onError(int response, @NonNull Exception e) {
+            Log.i(TAG, "Purchase failed.");
+            Log.i(TAG, "Response " + response);
+            Log.i(TAG, "Exception " + e);
+            if (response == ITEM_ALREADY_OWNED) {
+            }
+        }
+    }
+
+    //listener for consumed items
+    private class ConsumeListener extends EmptyRequestListener<Object> {
+        @Override
+        public void onSuccess(@Nonnull Object result) {
+            Log.i(TAG, "Purchase consumed: " + result.toString());
+            custInventory.load(
+                    Inventory.Request.create()
+                            .loadAllPurchases(), new CustomerInventoryCallback());
+        }
+
+        @Override
+        public void onError(int response, @Nonnull Exception e) {
+            Log.i(TAG, "Consume failed: " + e);
         }
     }
 
@@ -98,10 +125,15 @@ public class DonateActivity extends AppCompatActivity {
 
         mCheckout.start();
         mCheckout.createPurchaseFlow(new PurchaseListener());
-        mInventory = mCheckout.makeInventory();
-        mInventory.load(Inventory.Request.create()
-                //.loadAllPurchases()
-                .loadSkus(ProductTypes.IN_APP, getInAppSkus()), new InventoryCallback());
+        storeInventory = mCheckout.makeInventory();
+        custInventory = mCheckout.makeInventory();
+        storeInventory.load(
+                Inventory.Request.create()
+                .loadSkus(ProductTypes.IN_APP, getInAppSkus()), new StoreInventoryCallback());
+        custInventory.load(
+                Inventory.Request.create()
+                .loadAllPurchases()
+                .loadSkus(ProductTypes.IN_APP, getInAppSkus()), new CustomerInventoryCallback());
 
         Button donateButton1 = (Button) findViewById(R.id.donateButton1);
         Button donateButton5 = (Button) findViewById(R.id.donateButton5);
@@ -113,8 +145,9 @@ public class DonateActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mCheckout.whenReady(new Checkout.EmptyListener() {
                     @Override
-                    public void onReady(BillingRequests requests) {
-                        requests.purchase(ProductTypes.IN_APP, "donate_1_euro", null, mCheckout.getPurchaseFlow());
+                    public void onReady(@NonNull BillingRequests requests) {
+                        Log.i(TAG, "Button1 was pressed, mCheckout is ready");
+                        requests.purchase(ProductTypes.IN_APP, "donate_1_euro", null, mCheckout.getPurchaseFlow()) ;
                     }
                 });
             }
@@ -125,7 +158,8 @@ public class DonateActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mCheckout.whenReady(new Checkout.EmptyListener() {
                     @Override
-                    public void onReady(BillingRequests requests) {
+                    public void onReady(@NonNull BillingRequests requests) {
+                        Log.i(TAG, "Button5 was pressed, mCheckout is ready");
                         requests.purchase(ProductTypes.IN_APP, "donate_5_euro", null, mCheckout.getPurchaseFlow());
                     }
                 });
@@ -137,7 +171,8 @@ public class DonateActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mCheckout.whenReady(new Checkout.EmptyListener() {
                     @Override
-                    public void onReady(BillingRequests requests) {
+                    public void onReady(@NonNull BillingRequests requests) {
+                        Log.i(TAG, "Button10 was pressed, mCheckout is ready");
                         requests.purchase(ProductTypes.IN_APP, "donate_10_euro", null, mCheckout.getPurchaseFlow());
                     }
                 });
@@ -149,9 +184,9 @@ public class DonateActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mCheckout.whenReady(new Checkout.EmptyListener() {
                     @Override
-                    public void onReady(BillingRequests requests) {
+                    public void onReady(@NonNull BillingRequests requests) {
+                        Log.i(TAG, "Button15 was pressed, mCheckout is ready");
                         requests.purchase(ProductTypes.IN_APP, "donate_15_euro", null, mCheckout.getPurchaseFlow());
-                        Inventory.Product mProduct = Inventory.Products.empty().get(ProductTypes.IN_APP);
                     }
                 });
             }
@@ -168,7 +203,7 @@ public class DonateActivity extends AppCompatActivity {
         mCheckout.whenReady(new Checkout.EmptyListener() {
             @Override
             public void onReady(@Nonnull BillingRequests requests) {
-                requests.consume(purchase.token, makeRequestListener());
+                requests.consume(purchase.token, new ConsumeListener());
             }
         });
     }

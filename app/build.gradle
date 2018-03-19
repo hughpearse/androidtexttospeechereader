@@ -6,8 +6,8 @@ android {
         applicationId "hughpearse.myapplication004"
         minSdkVersion 23
         targetSdkVersion 23
-        versionCode 17
-        versionName "1.0b"
+        versionCode 23
+        versionName "1.0a"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
