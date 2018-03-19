@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import org.json.JSONException;
 import org.solovyev.android.checkout.ActivityCheckout;
 import org.solovyev.android.checkout.BillingRequests;
 import org.solovyev.android.checkout.Checkout;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nonnull;
+import org.json.JSONObject;
 
 import static org.solovyev.android.checkout.ResponseCodes.ITEM_ALREADY_OWNED;
 
@@ -65,15 +68,17 @@ public class DonateActivity extends AppCompatActivity {
             //Products [inapp, subs]
             //Skus [donate_10_euro, donate_5_euro]
             for(Product product : products){
-                Log.i(TAG, product.getSkus().size() + " skus");
-                for(Sku sku : product.getSkus()){
-                    if(sku.id.code.contains("donate_")){
-                        List<Purchase> purchases = product.getPurchases();
-                        Log.i(TAG, "Sku " + sku.id.code + " has " + purchases.size() + " purchases");
-                        for(Purchase purchase : purchases){
-                            Log.i(TAG, "Consuming purchase: " + purchase.data);
+                List<Purchase> purchases = product.getPurchases();
+                for(Purchase purchase : purchases){
+                    try {
+                        final JSONObject json = new JSONObject(purchase.data);
+                        Log.i(TAG, "Consuming purchase: " + purchase.data);
+                        if(json.getString("productId").contains("donate_")){
                             consume(purchase);
                         }
+                    } catch (JSONException e){
+                        Log.i(TAG, "Failed to parse productId from JSON: " + purchase.data);
+                        Log.i(TAG, "Exception: " + e);
                     }
                 }
             }
@@ -103,7 +108,7 @@ public class DonateActivity extends AppCompatActivity {
     private class ConsumeListener extends EmptyRequestListener<Object> {
         @Override
         public void onSuccess(@Nonnull Object result) {
-            Log.i(TAG, "Purchase consumed: " + result.toString());
+            Log.i(TAG, "Purchase consumed: ");
             custInventory.load(
                     Inventory.Request.create()
                             .loadAllPurchases(), new CustomerInventoryCallback());

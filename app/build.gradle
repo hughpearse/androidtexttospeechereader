@@ -6,8 +6,13 @@ android {
         applicationId "hughpearse.myapplication004"
         minSdkVersion 23
         targetSdkVersion 23
-        versionCode 25
-        versionName "1.1"
+        versionCode 26
+        //major.minor[.maintenance[.build]]
+        //major = new large features
+        //minor = new small features
+        //maintainance = bug fixes
+        //build = test build number
+        versionName "1.1.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
