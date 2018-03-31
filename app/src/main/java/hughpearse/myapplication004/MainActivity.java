@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int HANDLE_FILE_TYPES_CODE = 3;
     private static final int DISPLAY_READER_CODE = 4;
     private static final int DONATE_ACTIVITY_CODE = 5;
+    private static final int SETTINGS_ACTIVITY_CODE = 6;
     private static final String TAG = "TTS-MainActivity";
 
     @Override
@@ -43,6 +44,15 @@ public class MainActivity extends AppCompatActivity {
                 Intent myIntent = new Intent(MainActivity.this,
                         DonateActivity.class);
                 startActivityForResult(myIntent, DONATE_ACTIVITY_CODE);
+            }
+        });
+        Button button3 = (Button) findViewById(R.id.settingsButton);
+        button3.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                // Start NewActivity.class
+                Intent myIntent = new Intent(MainActivity.this,
+                        SettingsActivity.class);
+                startActivityForResult(myIntent, SETTINGS_ACTIVITY_CODE);
             }
         });
     }
@@ -108,6 +118,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case DONATE_ACTIVITY_CODE:
+                if (resultCode == RESULT_OK) {
+
+                }
+                break;
+            case SETTINGS_ACTIVITY_CODE:
                 if (resultCode == RESULT_OK) {
 
                 }

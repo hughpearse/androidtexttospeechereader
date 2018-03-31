@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class ReaderActivity extends AppCompatActivity {
 
-    private static final String TAG = "Class-ReaderActivity";
+    private static final String TAG = "TTS-ReaderActivity";
     EditText textBox;
     Button playPause;
     ArrayList<String> sentences = new ArrayList<>();
