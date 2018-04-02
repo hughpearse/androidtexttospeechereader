@@ -25,6 +25,8 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        final Context mContext = getApplicationContext();
+        final SharedPreferences sharedPref = mContext.getSharedPreferences("hp_tts_shared_pref", Context.MODE_PRIVATE);
         final Spinner voiceSpinner = findViewById(R.id.voiceSpinner);
         Locale defaultLocale = Locale.getDefault();
         final Locale[] availableLocales = defaultLocale.getAvailableLocales();
@@ -39,23 +41,17 @@ public class SettingsActivity extends AppCompatActivity {
         voiceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = sharedPref.edit();
                 Locale loc = (Locale)Array.get(availableLocales, (int) l);
-                editor.putString("mDefaultLocale", loc.toLanguageTag());
+                sharedPref.edit().putString("mDefaultLocale", loc.toLanguageTag()).commit();
                 Log.d(TAG, "saving mDefaultLocale: " + loc.toLanguageTag());
-                editor.commit();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-                Locale defaultLocale = Locale.getDefault();
-                int offset = Arrays.asList(availableLocales).indexOf(defaultLocale);
-                voiceSpinner.setSelection(offset);
             }
         });
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        String voiceSpinnerDefault = sharedPref.getString("mDefaultLocale",defaultLocale.toLanguageTag());
+        String lt = defaultLocale.toLanguageTag();
+        String voiceSpinnerDefault = sharedPref.getString("mDefaultLocale",lt);
         Locale searchLocale = new Locale(voiceSpinnerDefault);
         int offset = Arrays.asList(availableLocales).indexOf(searchLocale);
         voiceSpinner.setSelection(offset);
